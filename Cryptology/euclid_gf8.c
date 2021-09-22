@@ -15,7 +15,13 @@
  */
 int gcd(int a, int b)
 {
-    // 여기를 완성하세요
+    while (b > 0)
+    {
+        int tmp = a;
+        a = b;
+        b = tmp % b;
+    }
+    return a;
 }
 
 /*
@@ -27,7 +33,28 @@ int gcd(int a, int b)
  */
 int xgcd(int a, int b, int *x, int *y)
 {
-    // 여기를 완성하세요
+    int d0 = a, d1 = b;
+    int x0 = 1, y0 = 0, x1 = 0, y1 = 1;
+
+    while (d1 > 0)
+    {
+        int q = d0 / d1;
+        int tmp;
+        tmp = d0;
+        d0 = d1;
+        d1 = tmp - q * d1;
+
+        tmp = x0;
+        x0 = x1;
+        x1 = tmp - q * x1;
+
+        tmp = y0;
+        y0 = y1;
+        y1 = tmp - q * y1;
+    }
+    *x = x0;
+    *y = y0;
+    return d0;
 }
 
 /*
@@ -39,7 +66,25 @@ int xgcd(int a, int b, int *x, int *y)
  */
 int mul_inv(int a, int m)
 {
-    // 여기를 완성하세요
+    int d0 = a, d1 = m;
+    int x0 = 1, x1 = 0;
+
+    while (d1)
+    {
+        int q = d0 / d1;
+        int tmp;
+        tmp = d0;
+        d0 = d1;
+        d1 = tmp - q * d1;
+
+        tmp = x0;
+        x0 = x1;
+        x1 = tmp - q * x1;
+    }
+    if (d0 == 1)
+        return (x0 > 0 ? x0 : x0 + m);
+    else
+        return 0;
 }
 
 /*
@@ -53,7 +98,25 @@ int mul_inv(int a, int m)
  */
 uint64_t umul_inv(uint64_t a, uint64_t m)
 {
-    // 여기를 완성하세요
+    uint64_t d0 = a, d1 = m;
+    uint64_t x0 = 1, x1 = 0;
+
+    while (d1)
+    {
+        uint64_t q = d0 / d1;
+        uint64_t tmp;
+        tmp = d0;
+        d0 = d1;
+        d1 = tmp - q * d1;
+
+        tmp = x0;
+        x0 = x1;
+        x1 = tmp - q * x1;
+    }
+    if (d0 == 1)
+        return (x0 >> 63 ? x0 + m : x0 % m); // underflow 처리
+    else
+        return 0;
 }
 
 /*
@@ -64,7 +127,16 @@ uint64_t umul_inv(uint64_t a, uint64_t m)
  */
 uint8_t gf8_mul(uint8_t a, uint8_t b)
 {
-    // 여기를 완성하세요
+    uint8_t r = 0;
+
+    while (b > 0)
+    {
+        if (b & 1)
+            r = r ^ a;
+        b = b >> 1;
+        a = (a << 1) ^ ((a >> 7) & 1 ? 0x1B : 0);
+    }
+    return r;
 }
 
 /*
@@ -75,7 +147,15 @@ uint8_t gf8_mul(uint8_t a, uint8_t b)
  */
 uint8_t gf8_pow(uint8_t a, uint8_t b)
 {
-    // 여기를 완성하세요
+    uint8_t r = 1;
+    while (b > 0)
+    {
+        if (b & 1)
+            r = gf8_mul(r, a);
+        b = b >> 1;
+        a = gf8_mul(a, a);
+    }
+    return r;
 }
 
 /*
@@ -97,82 +177,101 @@ int main(void)
 {
     int a, b, x, y, d, count;
     uint64_t m, ai;
-    
+
     /*
      * 기본 gcd 시험
      */
     printf("--- 기본 gcd 시험 ---\n");
-    a = 28; b = 0;
-    printf("gcd(%d,%d) = %d\n", a, b, gcd(a,b));
-    a = 0; b = 32;
-    printf("gcd(%d,%d) = %d\n", a, b, gcd(a,b));
-    a = 41370; b = 22386;
-    printf("gcd(%d,%d) = %d\n", a, b, gcd(a,b));
-    a = 22386; b = 41371;
-    printf("gcd(%d,%d) = %d\n", a, b, gcd(a,b));
-    
+    a = 28;
+    b = 0;
+    printf("gcd(%d,%d) = %d\n", a, b, gcd(a, b));
+    a = 0;
+    b = 32;
+    printf("gcd(%d,%d) = %d\n", a, b, gcd(a, b));
+    a = 41370;
+    b = 22386;
+    printf("gcd(%d,%d) = %d\n", a, b, gcd(a, b));
+    a = 22386;
+    b = 41371;
+    printf("gcd(%d,%d) = %d\n", a, b, gcd(a, b));
+
     /*
      * 기본 xgcd, mul_inv 시험
      */
     printf("--- 기본 xgcd, mul_inv 시험 ---\n");
-    a = 41370; b = 22386;
+    a = 41370;
+    b = 22386;
     d = xgcd(a, b, &x, &y);
     printf("%d = %d * %d + %d * %d\n", d, a, x, b, y);
-    printf("%d^-1 mod %d = %d, %d^-1 mod %d = %d\n", a, b, mul_inv(a,b), b, a, mul_inv(b,a));
-    a = 41371; b = 22386;
+    printf("%d^-1 mod %d = %d, %d^-1 mod %d = %d\n", a, b, mul_inv(a, b), b, a, mul_inv(b, a));
+    a = 41371;
+    b = 22386;
     d = xgcd(a, b, &x, &y);
     printf("%d = %d * %d + %d * %d\n", d, a, x, b, y);
-    printf("%d^-1 mod %d = %d, %d^-1 mod %d = %d\n", a, b, mul_inv(a,b), b, a, mul_inv(b,a));
-    
+    printf("%d^-1 mod %d = %d, %d^-1 mod %d = %d\n", a, b, mul_inv(a, b), b, a, mul_inv(b, a));
+
     /*
      * 난수 a와 b를 발생시켜 xgcd를 계산하고, 최대공약수가 1이면 역이 존재하므로
      * 여기서 얻은 a^-1 mod b와 b^-1 mod a를 mul_inv를 통해 확인한다.
      * 이 과정을 8백만번 이상 반복하여 올바른지 확인한다.
      */
-    printf("--- 무작위 mul_inv 시험 ---\n"); fflush(stdout);
+    printf("--- 무작위 mul_inv 시험 ---\n");
+    fflush(stdout);
     count = 0;
-    do {
-        arc4random_buf(&a, sizeof(int)); a &= 0x7fffffff;
-        arc4random_buf(&b, sizeof(int)); b &= 0x7fffffff;
+    do
+    {
+        arc4random_buf(&a, sizeof(int));
+        a &= 0x7fffffff;
+        arc4random_buf(&b, sizeof(int));
+        b &= 0x7fffffff;
         d = xgcd(a, b, &x, &y);
-        if (d == 1) {
+        if (d == 1)
+        {
             if (x < 0)
                 x = x + b;
             else
                 y = y + a;
-            if (x != mul_inv(a, b) || y != mul_inv(b, a)) {
+            if (x != mul_inv(a, b) || y != mul_inv(b, a))
+            {
                 printf("Inversion error\n");
                 exit(1);
             }
         }
-        if (++count % 0xffff == 0) {
+        if (++count % 0xffff == 0)
+        {
             printf(".");
             fflush(stdout);
         }
     } while (count < 0xfffff);
     printf("No error found\n");
-    
+
     /*
      * GF(2^8)에서 기본 a*b 시험
      */
     printf("--- GF(2^8)에서 기본 a*b 시험 ---\n");
-    a = 28; b = 7;
-    printf("%d * %d = %d\n", a, b, gf8_mul(a,b));
-    a = 127; b = 68;
-    printf("%d * %d = %d\n", a, b, gf8_mul(a,b));
+    a = 28;
+    b = 7;
+    printf("%d * %d = %d\n", a, b, gf8_mul(a, b));
+    a = 127;
+    b = 68;
+    printf("%d * %d = %d\n", a, b, gf8_mul(a, b));
 
     /*
      * GF(2^8)에서 a를 1부터 255까지 a^-1를 구하고 a * a^-1 = 1인지 확인한다.
      */
     printf("--- GF(2^8)에서 전체 a*b 시험 ---\n");
-    for (a = 1; a < 256; ++a) {
-        if (a == 0) continue;
+    for (a = 1; a < 256; ++a)
+    {
+        if (a == 0)
+            continue;
         b = gf8_inv(a);
-        if (gf8_mul(a,b) != 1) {
+        if (gf8_mul(a, b) != 1)
+        {
             printf("Logic error\n");
             exit(1);
         }
-        else {
+        else
+        {
             printf(".");
             fflush(stdout);
         }
@@ -183,28 +282,34 @@ int main(void)
      * umul_inv 시험
      */
     printf("--- 기본 umul_inv 시험 ---\n");
-    a = 5; m = 9223372036854775808u;
+    a = 5;
+    m = 9223372036854775808u;
     ai = umul_inv(a, m);
     printf("a = %d, m = %llu, a^-1 mod m = %llu", a, m, ai);
-    if (ai != 5534023222112865485u) {
+    if (ai != 5534023222112865485u)
+    {
         printf(" <- inversion error\n");
         exit(1);
     }
     else
         printf(" OK\n");
-    a = 17; m = 9223372036854775808u;
+    a = 17;
+    m = 9223372036854775808u;
     ai = umul_inv(a, m);
     printf("a = %d, m = %llu, a^-1 mod m = %llu", a, m, ai);
-    if (ai != 8138269444283625713u) {
+    if (ai != 8138269444283625713u)
+    {
         printf(" <- inversion error\n");
         exit(1);
     }
     else
         printf(" OK\n");
-    a = 85; m = 9223372036854775808u;
+    a = 85;
+    m = 9223372036854775808u;
     ai = umul_inv(a, m);
     printf("a = %d, m = %llu, a^-1 mod m = %llu", a, m, ai);
-    if (ai != 9006351518340545789u) {
+    if (ai != 9006351518340545789u)
+    {
         printf(" <- inversion error\n");
         exit(1);
     }
