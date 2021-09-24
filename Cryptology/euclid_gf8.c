@@ -114,7 +114,7 @@ uint64_t umul_inv(uint64_t a, uint64_t m)
         x1 = tmp - q * x1;
     }
     if (d0 == 1)
-        return (x0 >> 63 ? x0 + m : x0 % m); // underflow 처리
+        return (x0 >> 63 ? x0 + m : x0); // underflow 처리
     else
         return 0;
 }
