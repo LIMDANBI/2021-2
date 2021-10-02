@@ -6,7 +6,7 @@
   - 
 
 ### 2. 데이터 마이닝
-  -
+  - Cervical Cancer EDA
   -
   -
 
