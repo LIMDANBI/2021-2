@@ -3,7 +3,7 @@
 
 ### 1. 인공지능
   - Logistic regression (boolean operator)
-  - Clustering (K means, DBSCAN)
+  - Clustering (K-means, DBSCAN)
   - 
 
 ### 2. 데이터 마이닝
