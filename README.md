@@ -2,8 +2,8 @@
 ## 수강 과목 
 
 ### 1. 인공지능
-  - logistic regression (boolean operator)
-  - K means, DBSCAN 
+  - Logistic regression (boolean operator)
+  - Clustering (K means, DBSCAN)
   - 
 
 ### 2. 데이터 마이닝
