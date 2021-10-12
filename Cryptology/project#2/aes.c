@@ -221,4 +221,3 @@ void Cipher(uint8_t *state, const uint32_t *roundKey, int mode)
     AddRoundKey(state, roundKey);
   }
 }
-
