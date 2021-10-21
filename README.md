@@ -4,7 +4,7 @@
 ### 1. 인공지능
   - Logistic regression (boolean operator)
   - Clustering (K-means, DBSCAN)
-  - 
+  - Shallow neural network (XOR 구현)
 
 ### 2. 데이터 마이닝
   - Cervical Cancer EDA
