@@ -23,5 +23,30 @@ const uint64_t a[ALEN] = {2,3,5,7,11,13,17,19,23,29,31,37};
  */
 int miller_rabin(uint64_t n)
 {
-// 여기를 완성하세요
+    uint64_t i, j, q=n-1, k=0, flg = PRIME;
+
+    // a의 원소 => 소수
+    for(i=0; i<ALEN; i++){
+        if(n==a[i]) return PRIME;
+    }
+
+    // 1 or 짝수 => 소수x 
+    if(n==1||n%2==0) return COMPOSITE;
+
+    // 밀러라빈 알고리즘의 사용될 q와 k를 구함
+    while(q%2==0){
+        q/=2;
+        k++;
+    }
+    
+    // a의 모든 원소에대해 두 가지 조건 (a^q mod n = 1 or (a^2q)^j mod n = n-1) 확인
+    for(i=0; i<ALEN; i++){
+        flg = COMPOSITE;
+        if(mod_pow(a[i], q, n) == 1) flg = PRIME;
+        for(j=0; j<=k-1; j++){
+            if(mod_pow(mod_pow(a[i], q, n), mod_pow(2,j,n), n) == n-1) flg = PRIME;
+        }
+        if (flg==COMPOSITE) return COMPOSITE;
+    }
+    return PRIME;
 }
