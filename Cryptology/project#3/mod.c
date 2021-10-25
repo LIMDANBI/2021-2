@@ -27,7 +27,7 @@ uint64_t mod_sub(uint64_t a, uint64_t b, uint64_t m)
 {
     a%=m; b%=m;
     if (a < b)
-        return a + m - b;
+        return a + (m - b);
     else
         return a - b;
 }
