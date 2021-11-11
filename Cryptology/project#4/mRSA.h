@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+#define ALEN 12
 #define PRIME 1
 #define COMPOSITE 0
 #define MINIMUM_N 0x8000000000000000
