@@ -21,9 +21,8 @@ const uint64_t a[ALEN] = {2,3,5,7,11,13,17,19,23,29,31,37};
  * n > 3, an odd integer to be tested for primality
  * It returns 1 if n is prime, 0 otherwise.
  */
-int miller_rabin(uint64_t n)
-{
-    uint64_t i, j, q=n-1, k=0, flg = PRIME;
+int miller_rabin(uint64_t n){
+    uint64_t i, j, l, q=n-1, k=0, flg = PRIME;
 
     // a의 원소 => 소수
     for(i=0; i<ALEN; i++){
@@ -42,9 +41,11 @@ int miller_rabin(uint64_t n)
     // a의 모든 원소에대해 두 가지 조건 (a^q mod n = 1 or (a^2q)^j mod n = n-1) 확인
     for(i=0; i<ALEN; i++){
         flg = COMPOSITE;
+        l = 1;
         if(mod_pow(a[i], q, n) == 1) flg = PRIME;
-        for(j=0; j<=k-1; j++){
-            if(mod_pow(mod_pow(a[i], q, n), mod_pow(2,j,n), n) == n-1) flg = PRIME;
+        for(j=0; j<k; j++){
+            if(mod_pow(mod_pow(a[i], q, n), l, n) == n-1) flg = PRIME;
+            l*=2;
         }
         if (flg==COMPOSITE) return COMPOSITE;
     }
