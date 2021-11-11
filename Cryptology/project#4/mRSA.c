@@ -70,34 +70,19 @@ static uint64_t mod_pow(uint64_t a, uint64_t b, uint64_t m){
 
 // 64비트 정수 n이 소수이면 PRIME을, 합성수이면 COMPOSITE를 반환
 static int miller_rabin(uint64_t n){
-    uint64_t i, j, l, q=n-1, k=0, flg = PRIME;
+	if(n==2) return PRIME;
+	if(n%2==0) return COMPOSITE;
 
-    // a의 원소 => 소수
-    for(i=0; i<ALEN; i++){
-        if(n==a[i]) return PRIME;
-    }
-
-    // 1 or 짝수 => 소수x 
-    if(n==1||n%2==0) return COMPOSITE;
-
-    // 밀러라빈 알고리즘의 사용될 q와 k를 구함
-    while(q%2==0){
-        q/=2;
-        k++;
-    }
-    
-    // a의 모든 원소에대해 두 가지 조건 (a^q mod n = 1 or (a^2q)^j mod n = n-1) 확인
-    for(i=0; i<ALEN; i++){
-        flg = COMPOSITE;
-        l = 1;
-        if(mod_pow(a[i], q, n) == 1) flg = PRIME;
-        for(j=0; j<k; j++){
-            if(mod_pow(mod_pow(a[i], q, n), l, n) == n-1) flg = PRIME;
-            l*=2;
-        }
-        if (flg==COMPOSITE) return COMPOSITE;
-    }
-    return PRIME;
+	int i = 0;
+	uint64_t k, pow;
+	while (i < ALEN && a[i] < n-1){
+		k=n-1;
+		pow = mod_pow(a[i], k, n);
+		if( pow !=1)
+			return COMPOSITE;
+		i++;
+	}
+	return PRIME;
 }
 
 /*
