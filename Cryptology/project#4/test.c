@@ -4,13 +4,16 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "mRSA.h"
 
 int main(void)
 {
+    clock_t start = (double)clock() / CLOCKS_PER_SEC;    
+
     uint64_t e, d, n, m, c;
     int i, count;
-
+    
     /*
      * 기본시험 1: m = 0부터 19까지 암복호화 검증
      */
@@ -72,4 +75,7 @@ int main(void)
         }
     } while (count < 0xfff);
     printf("No error found!\n");
+
+    clock_t  end = (((double)clock()) / CLOCKS_PER_SEC);
+	printf("프로그램 수행 시간 : %lu\n", (end-start));
 }

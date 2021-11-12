@@ -70,19 +70,34 @@ static uint64_t mod_pow(uint64_t a, uint64_t b, uint64_t m){
 
 // 64비트 정수 n이 소수이면 PRIME을, 합성수이면 COMPOSITE를 반환
 static int miller_rabin(uint64_t n){
-	if(n==2) return PRIME;
-	if(n%2==0) return COMPOSITE;
+    uint64_t i, j, q=n-1, k=0, flg;
+    // 1  => 소수x 
+    if(n==1) return COMPOSITE;
 
-	int i = 0;
-	uint64_t k, pow;
-	while (i < ALEN && a[i] < n-1){
-		k=n-1;
-		pow = mod_pow(a[i], k, n);
-		if( pow !=1)
-			return COMPOSITE;
-		i++;
-	}
-	return PRIME;
+    // a의 원소 => 소수 / a의 원소로 나누어 떨어짐 => 합성수
+    for(i=0; i<ALEN; i++){
+        if(n==a[i]) return PRIME;
+        if(n%a[i] == 0) return COMPOSITE;
+    }
+
+    // 밀러라빈 알고리즘의 사용될 q와 k를 구함
+    while(q%2==0){
+        q/=2;
+        k++;
+    }
+    
+    // a의 모든 원소에대해 두 가지 조건 (a^q mod n = 1 or (a^2q)^j mod n = n-1) 확인
+    for(i=0; i<ALEN; i++){
+        flg = COMPOSITE;
+        uint64_t tmp = mod_pow(a[i], q, n);
+        if(tmp==1) continue;
+        for(j=0; j<k; j++){
+            if(tmp==n-1) flg=PRIME;
+            tmp = mod_mul(tmp, tmp, n);
+        }
+        if(flg==COMPOSITE) return COMPOSITE;
+    }
+    return PRIME;
 }
 
 /*
@@ -92,21 +107,25 @@ static int miller_rabin(uint64_t n){
 void mRSA_generate_key(uint64_t *e, uint64_t *d, uint64_t *n){
     uint64_t p=0, q=0, Lambda;
     while (p*q < MINIMUM_N){
-        while (1){
+        while(1){
             arc4random_buf(&p, sizeof(uint32_t));
-            if(miller_rabin(p)) break;
+            if(p%2==1){
+                if(miller_rabin(p)) break;
+            }
         }
-        while (1){
+        while(1){
             arc4random_buf(&q, sizeof(uint32_t));
-            if(miller_rabin(q)) break;
+            if(q%2==1){
+                if(miller_rabin(q)) break;
+            }
         }
     }
-    *n = p * q; // n 생성
-    Lambda = ((p - 1)*(q - 1))/gcd(p - 1, q - 1);
+    *n = p*q; // n 생성
+    Lambda = ((p-1)*(q-1))/gcd(p-1, q-1);
     while (1){ // e, d 생성
-        arc4random_buf(e,sizeof(uint64_t));
-        if ((1 < *e) && (*e < Lambda) && (gcd(*e,Lambda) == 1)){
-            *d = mul_inv(*e,Lambda);
+        arc4random_buf(e, sizeof(uint64_t));
+        if (1<*e && *e<Lambda && gcd(*e, Lambda) == 1){
+            *d = mul_inv(*e, Lambda);
             break;
         }   
     }
