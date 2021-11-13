@@ -6,7 +6,7 @@
   - Clustering (K-means, DBSCAN)
   - Shallow neural network (XOR 구현)
   - MNIST dataset hidden layer PCA와 t-SNE 시각화 (term-project)
-  - RSA-PSS 확률적 전자서명 기법 구현
+  - 
 
 ### 2. 데이터 마이닝
   - Cervical Cancer EDA
@@ -17,7 +17,7 @@
   - AES 알고리즘 구현
   - Miller Rabin Algorithm(밀러-라빈 알고리즘) 구현
   - RSA 알고리즘 구현
-  - 
+  - RSA-PSS 확률적 전자서명 기법 구현
 
 ### 4. 데이터 통신공학
 
