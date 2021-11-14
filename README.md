@@ -32,4 +32,4 @@
 
 <br>
 
-## SW융합 대학 학술 대회 - 주제: NLP를 이용한 감성 분석
+## SW융합 대학 학술 대회 - 주제: NLP를 이용한 감성 분석[!https://github.com/LIMDANBI/sentimentAnalysis]
