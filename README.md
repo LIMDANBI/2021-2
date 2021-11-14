@@ -34,6 +34,4 @@
 
 ## [SW융합 대학 학술 대회 - 주제: NLP를 이용한 감성 분석](https://github.com/LIMDANBI/sentimentAnalysis)
 
-<br>
-
 ## [신용카드 사용자 연체 예측 AI 경진대회](https://github.com/LIMDANBI/dacon_2021)
