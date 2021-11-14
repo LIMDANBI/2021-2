@@ -109,15 +109,11 @@ void mRSA_generate_key(uint64_t *e, uint64_t *d, uint64_t *n){
     while (p*q < MINIMUM_N){
         while(1){
             arc4random_buf(&p, sizeof(uint32_t));
-            if(p%2==1){
-                if(miller_rabin(p)) break;
-            }
+            if(p%2==1 && miller_rabin(p)) break;
         }
         while(1){
             arc4random_buf(&q, sizeof(uint32_t));
-            if(q%2==1){
-                if(miller_rabin(q)) break;
-            }
+            if(q%2==1 && miller_rabin(q)) break;
         }
     }
     *n = p*q; // n 생성
@@ -136,7 +132,7 @@ void mRSA_generate_key(uint64_t *e, uint64_t *d, uint64_t *n){
  * If data >= n then returns 1 (error), otherwise 0 (success).
  */
 int mRSA_cipher(uint64_t *m, uint64_t k, uint64_t n){
-    if(n<=*m) return 1;
+    if(n<=*m) return 1; // m이 값의 범위를 넘었으므로 오류 처리
     *m = mod_pow(*m, k, n);
     return 0;
 }
