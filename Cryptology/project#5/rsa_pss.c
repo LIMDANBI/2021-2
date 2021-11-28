@@ -160,15 +160,142 @@ static unsigned char *mgf(const unsigned char *mgfSeed, size_t seedLen, unsigned
 }
 
 /*
- * rsassa_pss_sign - RSA Signature Scheme with Appendix
+ * rsassa_pss_sign - RSA Signature Scheme with Appendix 
+ * RSA 서명
  */
 int rsassa_pss_sign(const void *m, size_t mLen, const void *d, const void *n, void *s)
 {
+    unsigned char mHash[SHASIZE/8];
+    unsigned char salt[SHASIZE/8];
+    unsigned char Mprime[8+2*(SHASIZE/8)];
+    unsigned char DB[RSAKEYSIZE/8-SHASIZE/8-1];
+    unsigned char MGF[RSAKEYSIZE/8-SHASIZE/8-1];
+    unsigned char maskedDB[RSAKEYSIZE/8-SHASIZE/8-1];
+    unsigned char H[SHASIZE/8];
+    unsigned char EM[RSAKEYSIZE/8];
+    uint8_t msb = 0x01;
+    uint8_t bc = 0xbc; 
+
+    // 해시함수의 입력 데이터가 너무 길어 한도를 초과한 경우 
+    // SHASIZE가 224 or 256의 경우 mLen이 64 bits를 넘으면 안됨
+    if((SHASIZE == 224 || SHASIZE == 256) && (0x1fffffffffffffff<mLen))
+        return EM_MSG_TOO_LONG;
+    
+    // 해시의 길이가 너무 커서 EM에서 수용할 수 없는 경우 
+    if(RSAKEYSIZE/8 < 2*(SHASIZE/8)+2)
+        return EM_HASH_TOO_LONG;
+    
+    // M' (Mprime)
+    for(int i=0; i<8; i++) Mprime[i]=0x00;
+    
+    // mHash
+    sha(m, mLen, mHash);
+    memcpy(Mprime+8, mHash, SHASIZE/8);
+
+    // salt
+    arc4random_buf(salt, SHASIZE/8);
+    memcpy(Mprime+8+SHASIZE/8, salt, SHASIZE/8);
+
+    // H
+    sha(Mprime, 8+2*(SHASIZE/8), H);
+
+    // DB
+    for(int i=0; i<RSAKEYSIZE/8-2*(SHASIZE/8)-1; i++) DB[i]=0x00;
+    memcpy(DB+RSAKEYSIZE/8-2*(SHASIZE/8)-2, &msb, 1);
+    memcpy(DB+RSAKEYSIZE/8-2*(SHASIZE/8)-1, salt, SHASIZE/8);
+
+    //MGF
+    mgf(H, SHASIZE/8, MGF, RSAKEYSIZE/8-SHASIZE/8-1);
+
+    // maskedDB
+    for(int i=0; i<RSAKEYSIZE/8-SHASIZE/8-1; i++){
+        maskedDB[i] = DB[i]^MGF[i];
+        EM[i] = maskedDB[i];
+    }
+
+    // EM
+    if((EM[0]>>7) & 1) EM[0] = 0x00;
+    memcpy(EM+RSAKEYSIZE/8-SHASIZE/8-1, H, SHASIZE/8);
+    memcpy(EM+RSAKEYSIZE/8-1, &bc, 1);
+
+    // s
+    // 데이터 값이 모듈러스 n 보다 크거나 같은 경우 
+    if(rsa_cipher(EM, d, n)) 
+        return EM_MSG_OUT_OF_RANGE;
+    memcpy(s, EM, RSAKEYSIZE/8);
+
+    return 0;
 }
 
 /*
- * rsassa_pss_verify - RSA Signature Scheme with Appendix
+ * rsassa_pss_verify - RSA Signature Scheme with Appendix (
+ * RSA 검증
  */
 int rsassa_pss_verify(const void *m, size_t mLen, const void *e, const void *n, const void *s)
 {
+    unsigned char salt[SHASIZE/8];
+    unsigned char mHash[SHASIZE/8];
+    unsigned char Mprime[8+2*(SHASIZE/8)];
+    unsigned char MHash[SHASIZE/8];
+    unsigned char H[SHASIZE/8];
+    unsigned char DB[RSAKEYSIZE/8-SHASIZE/8-1];
+    unsigned char maskedDB[RSAKEYSIZE/8-SHASIZE/8-1];
+    unsigned char EM[RSAKEYSIZE/8];
+    unsigned char HMGF[SHASIZE/8];
+    
+    // EM (s^e mod n = EM)
+    memcpy(EM, s, RSAKEYSIZE/8);
+    if(rsa_cipher(EM, e, n)) 
+        return EM_MSG_OUT_OF_RANGE;
+    
+    // EM의 처음 (MSB) 비트가 0이 아닌 경우 
+    if(EM[0]>>7)   
+        return EM_INVALID_INIT;
+    
+    // EM의 마지막 (LSB) 바이트가 0xBC가 아닌 경우
+    if(EM[RSAKEYSIZE/8-1]^0xbc)
+        return EM_INVALID_LAST;
+
+    // maskedDB
+    memcpy(maskedDB, EM, RSAKEYSIZE/8-SHASIZE/8-1);
+
+    // H
+    memcpy(H, EM+RSAKEYSIZE/8-SHASIZE/8-1, SHASIZE/8);
+
+    // MGF(H)
+    mgf(H, SHASIZE/8, HMGF, RSAKEYSIZE/8-SHASIZE/8-1);
+
+    // DB
+    DB[0] = 0x00;
+    for(int i=1; i<RSAKEYSIZE/8-SHASIZE/8-1; i++)
+        DB[i] = maskedDB[i]^HMGF[i];
+
+    // DB의 앞 부분이 0x0000..00||0x01과 일치하지 않는 경우
+    for(int i=0; i<RSAKEYSIZE/8-2*(RSAKEYSIZE/8)-2; i++){
+        if(DB[i] ^ 0x00)
+            return EM_INVALID_PD2;
+    }
+    if(DB[RSAKEYSIZE/8-2*SHASIZE/8-2] ^ 0x01)
+        return EM_INVALID_PD2;
+
+    //salt
+    memcpy(salt, DB+RSAKEYSIZE/8-2*(SHASIZE/8)-1, SHASIZE/8);
+
+    // mHash
+    sha(m, mLen, mHash);
+
+    // M'(Mprime)
+    for(int i = 0; i < 8; i++) Mprime[i] = 0x00;
+    memcpy(Mprime+8, mHash, SHASIZE/8);
+    memcpy(Mprime+8+SHASIZE/8, salt, SHASIZE/8);
+
+    // H(M')
+    sha(Mprime, 8+2*(SHASIZE/8), MHash);
+
+    for(int i=0; i<SHASIZE/8; i++){
+        // 해시 값이 일치하지 않는 경우
+        if(H[i]^MHash[i]) 
+            return EM_HASH_MISMATCH;
+    }
+    return 0;
 }
