@@ -6,7 +6,7 @@
   - Clustering (K-means, DBSCAN)
   - Shallow neural network (XOR 구현)
   - MNIST dataset hidden layer PCA와 t-SNE 시각화 (term-project)
-  - 
+  - Recommender Systems
 
 ### 2. 데이터 마이닝
   - Cervical Cancer EDA
