@@ -23,8 +23,8 @@ if __name__ == '__main__':
     _, _, n_ratings = train_data.get_datasize()
 
     # 정규화에 사용
-    lambda1 = 0.005
-    lambda2 = 0.005
+    lambda1 = 0.0005
+    lambda2 = 0.0005
 
     # 학습 데이터와 검증 데이터 분할
     n_train = int(len(train_data) * 0.8)
