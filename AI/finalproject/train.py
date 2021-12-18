@@ -1,5 +1,6 @@
 import argparse
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import random_split
@@ -27,7 +28,7 @@ if __name__ == '__main__':
     lambda2 = 0.005
 
     # 학습 데이터와 검증 데이터 분할
-    n_train = int(len(train_data) * 0.8)
+    n_train = int(len(train_data) * 0.9)
     n_val = len(train_data) - n_train
     train_data, valid_data = random_split(train_data, [n_train, n_val])
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
             cost += loss.item()*len(ratings)
-        cost = (cost + lambda1*torch.sum(model.U**2) + lambda2*torch.sum(model.V**2))/(n_ratings*0.8)
+        cost = (cost + lambda1*torch.sum(model.U**2) + lambda2*torch.sum(model.V**2))/(n_ratings*0.9)
         print("Epoch: {} | train cost: {:.6f}".format(epoch, cost))
 
         cost_valid = 0
@@ -56,7 +57,7 @@ if __name__ == '__main__':
             ratings_pred = model(users, items)
             loss = criterion(ratings_pred, ratings)
             cost_valid += loss.item()*len(ratings)
-        cost_valid/=(n_ratings*0.2)
+        cost_valid/=(n_ratings*0.1)
         print("Epoch: {} | valid cost: {:.6f}".format(epoch, cost_valid))
         print()
     torch.save(model.state_dict(), args.save_model)
