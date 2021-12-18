@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 
-
 class ModelClass(nn.Module):
 
     def __init__(self, num_users=610, num_items=193609, rank=10):

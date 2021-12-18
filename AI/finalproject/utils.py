@@ -2,7 +2,6 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-
 class RecommendationDataset(Dataset):
     def __init__(self, datapath, train=True):
         self.data_pd = pd.read_csv(datapath)

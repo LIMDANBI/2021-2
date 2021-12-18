@@ -35,7 +35,7 @@ if __name__ == '__main__':
     model.load_state_dict(torch.load(args.load_model))
 
     # load dataset in test folder
-    test_data = RecommendationDataset(f'{args.dataset}/ratings.csv', train=False)
+    test_data = RecommendationDataset('test/ratings.csv', train=False)
     test_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=False)
 
     # write model inference
