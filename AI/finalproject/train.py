@@ -15,8 +15,8 @@ if __name__ == '__main__':
     # hyperparameter
     train_size, valid_size = 0.9, 0.1
     batch_size = 32
-    learning_rate = 0.01
-    num_epoch = 15
+    learning_rate = 0.001
+    num_epoch = 30
     weight_decay = 0
 
     parser = argparse.ArgumentParser(description='2021 AI Final Project')
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     # instantiate model
     model = EmbeddingLayer()
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     criterion = torch.nn.MSELoss()
 
     train_cost_arr = []
@@ -70,9 +70,9 @@ if __name__ == '__main__':
         print()
 
         # early stopping
-        # if 0 < epoch and valid_cost_arr[epoch-1] < cost_valid :
-        #     print("------ Early Stoping : validation cost increase ------")
-        #     break
+        if 0 < epoch and valid_cost_arr[epoch-1] < cost_valid :
+            print("------ Early Stopping : validation cost increase ------")
+            break
     torch.save(model.state_dict(), args.save_model)
 
     # 그래프 출력

@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from model import ModelClass
+from model import EmbeddingLayer
 from utils import RecommendationDataset
 
 
@@ -31,7 +32,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # instantiate model
-    model = ModelClass()
+    model = EmbeddingLayer()
     model.load_state_dict(torch.load(args.load_model))
 
     # load dataset in test folder
