@@ -23,10 +23,6 @@ if __name__ == '__main__':
     train_data = RecommendationDataset("data/ratings.csv", train=True)
     _, _, n_ratings = train_data.get_datasize()
 
-    # 정규화에 사용
-    lambda1 = 0.005
-    lambda2 = 0.005
-
     # 학습 데이터와 검증 데이터 분할
     n_train = int(len(train_data) * 0.9)
     n_val = len(train_data) - n_train
@@ -49,7 +45,7 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
             cost += loss.item()*len(ratings)
-        cost = (cost + lambda1*torch.sum(model.U**2) + lambda2*torch.sum(model.V**2))/(n_ratings*0.9)
+        cost/=(n_ratings*0.9)
         print("Epoch: {} | train cost: {:.6f}".format(epoch, cost))
 
         cost_valid = 0
